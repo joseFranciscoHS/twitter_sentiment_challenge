@@ -1,20 +1,21 @@
+#Libraries for sentiment analysispython
 import snscrape.modules.twitter as sntwitter
 import pandas as pd
 from textblob import TextBlob
 
-query = "(mexico OR méxico OR Mexico OR México) until:2023-02-28 since:2023-02-01"
+loc = "23.634501, -102.552784, 1789km"
+#query = "(mexico OR méxico OR Mexico OR México) geocode:'{}'.format(loc) until:2023-02-28 since:2023-02-01" 
+#query = """'(mexico) geocode:"{}"'.format(loc) until:2023-02-28 since:2023-02-01"""
+query = '(mexico OR méxico OR Mexico OR México) until:2023-02-28 since:2023-02-01 geocode:"{}"'.format(loc) 
+#query = "(mexico OR méxico OR Mexico OR México) until:2023-02-28 since:2023-02-01" 
 tweets = []
-limit = 100
+limit = 1000
 
 for tweet in sntwitter.TwitterSearchScraper(query).get_items():
 
     #print(vars(tweet))
+    #print(df.dtypes) #data types
     #print(len(vars(tweet).keys())) #29
-    """
-    dict_keys(['url', 'date', 'rawContent', 'renderedContent', 'id', 'user', 'replyCount', 'retweetCount', 'likeCount', 'quoteCount',
-    'conversationId', 'lang', 'source', 'sourceUrl', 'sourceLabel', 'links', 'media', 'retweetedTweet', 'quotedTweet', 
-    'inReplyToTweetId', 'inReplyToUser', 'mentionedUsers', 'coordinates', 'place', 'hashtags', 'cashtags', 'card', 'viewCount', 'vibe'])   
-    """
     #print(vars(tweet).values())
     #print(vars(tweet).items())
     """
@@ -53,17 +54,37 @@ for tweet in sntwitter.TwitterSearchScraper(query).get_items():
     
     if len(tweets) == limit:
         break
-    else: #revisar origen de tweet y cantidad de tweet > 2700
-        tweets.append([tweet.id, tweet.date, tweet.user.username, tweet.content, tweet.lang, TextBlob(tweet.content).sentiment])
+    else: #revisar origen de tweet y cantidad de tweet > 2700 
+        """
+        Tending en twitter: De 4:00 a 10:00 se necesitan 1200 tweets y 500 usuarios.
+                            De 10:00 a 16:00 se necesitan 1700 tweets y 734 usuarios.
+                            De 16:00 a 22:00 se necesitan 1500 tweets y 811 usuarios.
+        Questions to be answered:
+        “¿Cuáles son las palabras más empleadas?, [Tweets]
+        ¿Qué sentimiento es más intenso?, Contabilizar calificaciòn e indicar frecuencia 
+        ¿Qué tan objetivos son los Tweets sobre el tema?, seleccionar los neutrales e indicar porcentaje con respecto al total
+        ¿Qué tan positivos se espera que sean los comentarios para el día de mañana?”. Anàlisis predictivo
+        """
+        #Dropping irrelevant columns
+        tweets.append([tweet.id, tweet.date, tweet.user.id, tweet.content, tweet.lang, TextBlob(tweet.content).sentiment, tweet.source, tweet.replyCount, tweet.retweetCount, tweet.likeCount])
 
-df = pd.DataFrame(tweets, columns = ['ID', 'Date', 'User', 'Tweet', 'Language', 'SentimentAnalysis'])
+df = pd.DataFrame(tweets, columns = ['ID', 'Date', 'User', 'Content', 'Language', 'SentimentAnalysis', 'Source', 'ReplyCount', 'RetweetCount', 'LikeCount'])
 #print(df.dtypes) #data types
-#print(df.shape) #number of rows and columns
-#print(df.columns) #name of columns
+#print(df.shape) #number of rows and columns , df.columns name of columns
+#duplicate_rows_df = df[df.duplicated()] #No duplicate values
+#print(duplicate_rows_df)
+##Remove duplicate data: [ID]
+#df = df.drop_duplicates() 
+##Drop missing or null values : [SentimentAnalysis]
+#print(df.isnull().sum()) #No null values
+#df = df.dropna()
+#print(df.count())
 
-#The score in a sentiment analysis result represents the intensity or strength of the sentiment. It is not a confidence score. 
-#This score is always a value in the range [-1, 1]. A score below -0.3 indicates a negative (sad/angry) sentiment, 
-#while a score above 0.3 indicates a positive (joyful/happy) sentiment. Scores in the range [-0.3, 0.3] indicate neutral sentiment.
-#print(df[['Tweet']])
-print(df)
+"""
+The score in a sentiment analysis result represents the intensity or strength of the sentiment. It is not a confidence score. 
+This score is always a value in the range [-1, 1]. A score below -0.3 indicates a negative (sad/angry) sentiment, 
+while a score above 0.3 indicates a positive (joyful/happy) sentiment. Scores in the range [-0.3, 0.3] indicate neutral sentiment.
+"""
+print(df[['Content']])
+#print(df)
 
