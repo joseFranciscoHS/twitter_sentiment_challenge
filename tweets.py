@@ -1,4 +1,5 @@
 #Libraries for sentiment analysispython
+
 import snscrape.modules.twitter as sntwitter
 import pandas as pd
 from textblob import TextBlob
@@ -50,8 +51,7 @@ for tweet in sntwitter.TwitterSearchScraper(query).get_items():
     ('vibe', None)])
     """
     #break
-    
-    
+     
     if len(tweets) == limit:
         break
     else: #revisar origen de tweet y cantidad de tweet > 2700 
@@ -85,6 +85,45 @@ The score in a sentiment analysis result represents the intensity or strength of
 This score is always a value in the range [-1, 1]. A score below -0.3 indicates a negative (sad/angry) sentiment, 
 while a score above 0.3 indicates a positive (joyful/happy) sentiment. Scores in the range [-0.3, 0.3] indicate neutral sentiment.
 """
-print(df[['Content']])
-#print(df)
+#print(df[['Content']])
+print(df)
 
+''''''
+
+'''
+import mysql.connector
+from mysql.connector import Error
+
+try: 
+    connection = mysql.connector.connect(host = 'localhost',
+                                         database = 'twitter',
+                                         user = 'root',
+                                         password = 'Elhe1005lore27**')
+
+    mySql_Create_Table_Query = """CREATE TABLE tweet (
+
+                                )"""
+
+    cursor = connection.cursor()
+    result = cursor.execute(mySql_Create_Table_Query)
+    print("Tweet Table created successfully")                            
+
+    if connection.is_connected():
+        db_Info = connection.get_server_info()
+        print("Connected to MySQL Server version ", db_Info)
+        cursor = connection.cursor()
+        cursor.execute("select database();")
+        record = cursor.fetchone()
+        print("You're connected to datbase: ", record)
+    
+except Error as e:
+        print("Error while connecting to MySQL", e)
+finally:
+    if connection.is_connected():
+        cursor.close()
+        connection.close()
+        print("MySQL connection is closed")
+
+
+
+'''
