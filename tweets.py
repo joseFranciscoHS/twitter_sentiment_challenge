@@ -2,6 +2,8 @@ import mysql.connector
 from mysql.connector import Error
 import json
 
+
+
 def extractTweet():
     tweets = [
     {
@@ -274,11 +276,13 @@ def connection():
     except Error as e:
             print("Error while connecting to MySQL", e)
 
+    """
     finally:
         if connection.is_connected():
             cursor.close()
             connection.close()
             print("MySQL connection is closed")
+    """
 
 #connection()
 
@@ -312,11 +316,13 @@ def createTable():
     except mysql.connector.Error as error:
             print("Failed to create table in MySQL", format(error))
 
+    """
     finally:
         if connection.is_connected():
             cursor.close()
             connection.close()
             print("MySQL connection is closed")
+    """
 
 #createTable()
 
@@ -346,8 +352,15 @@ def insertRowsIntoTable():
             connection.close()
             print("MySQL connection is closed")
 
-insertRowsIntoTable()
+#insertRowsIntoTable()
 
+def main():
+    extractTweet()
+    connection()
+    createTable()
+    insertRowsIntoTable()
+
+main()
 
 
 
