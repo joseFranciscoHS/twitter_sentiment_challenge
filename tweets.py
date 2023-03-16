@@ -2,7 +2,20 @@ import mysql.connector
 from mysql.connector import Error
 import json
 
-
+try:
+  cnx = mysql.connector.connect(host = 'localhost',
+                                database = 'twitter',
+                                user = 'root',
+                                password = 'Elhe1005lore27**')
+except mysql.connector.Error as err:
+  if err.errno == Error.ER_ACCESS_DENIED_ERROR:
+    print("Something is wrong with your user name or password")
+  elif err.errno == Error.ER_BAD_DB_ERROR:
+    print("Database does not exist")
+  else:
+    print(err)
+#else:
+  #cnx.close()
 
 def extractTweet():
     tweets = [
@@ -258,41 +271,9 @@ def extractTweet():
     tuple_array = [(d['id'], d['texto'], d['usuario'], tuple(d['hashtags']), d['fecha'], d['retweets'], d['favoritos']) for d in dict_array]
     print(tuple_array)
 
-def connection():
-    try: 
-        connection = mysql.connector.connect(host = 'localhost',
-                                            database = 'twitter',
-                                            user = 'root',
-                                            password = 'Elhe1005lore27**')
-
-        if connection.is_connected():
-            db_Info = connection.get_server_info()
-            print("Connected to MySQL Server version ", db_Info)
-            cursor = connection.cursor()
-            cursor.execute("select database();")
-            record = cursor.fetchone()
-            print("You're connected to database: ", record)                            
-
-    except Error as e:
-            print("Error while connecting to MySQL", e)
-
-    """
-    finally:
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
-            print("MySQL connection is closed")
-    """
-
-#connection()
 
 def createTable():
-    try: 
-        connection = mysql.connector.connect(host = 'localhost',
-                                            database = 'twitter',
-                                            user = 'root',
-                                            password = 'Elhe1005lore27**')
-
+    try:
         mySql_Create_Table_Query = """
                                     DROP TABLE IF EXISTS TweetDB,
                                     CREATE TABLE IF NOT EXISTS TweetDB (
@@ -309,54 +290,39 @@ def createTable():
                                     );
                                     """
 
-        cursor = connection.cursor()
+        cursor = cnx.cursor()
         result = cursor.execute(mySql_Create_Table_Query, multi=True)
         print("Tweet Table created successfully")                            
 
     except mysql.connector.Error as error:
             print("Failed to create table in MySQL", format(error))
 
-    """
-    finally:
-        if connection.is_connected():
-            cursor.close()
-            connection.close()
-            print("MySQL connection is closed")
-    """
-
-#createTable()
 
 def insertRowsIntoTable():
     try: 
-        connection = mysql.connector.connect(host = 'localhost',
-                                            database = 'twitter',
-                                            user = 'root',
-                                            password = 'Elhe1005lore27**')
 
         mySql_insert_Query = """INSERT INTO TweetDB (IdTweet, Tweet, Username, Hashtags, Datetime, Retweets, Favourites)
                                 VALUES (%s, %s, %s, %s, %s, %s, %s)"""
                                     
         records_to_insert = extractTweet()    
         
-        cursor = connection.cursor()
+        cursor = cnx.cursor()
         cursor.executemany(mySql_insert_Query, records_to_insert)
-        connection.commit()
+        cnx.commit()
         print(cursor.rowcount, "Record inserted successfully into TweetDB table")                            
 
     except mysql.connector.Error as error:
         print("Failed to insert record into MySQL table {}".format(error))
 
     finally:
-        if connection.is_connected():
+        if cnx.is_connected():
             cursor.close()
-            connection.close()
+            cnx.close()
             print("MySQL connection is closed")
 
-#insertRowsIntoTable()
 
 def main():
     extractTweet()
-    connection()
     createTable()
     insertRowsIntoTable()
 
